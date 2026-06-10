@@ -2,6 +2,10 @@ import pandas as pd
 
 from business_logic import *
 
+NEIGHBORHOOD_COLUMN = "NOMBRE_BARRIO"
+NEIGHBORHOOD_MAPPING = {
+    "ABRAHAM LINCON": "ABRAHAM LINCOLN"
+}
 
 def require_dataframe(dataframe):
     if dataframe is None:
@@ -62,6 +66,8 @@ taxes = load_taxes_data()
 # print("=" * 50)
 # print("Imputation of missing values")
 
+taxes = require_dataframe(normalize_categorical_column(taxes, NEIGHBORHOOD_COLUMN, NEIGHBORHOOD_MAPPING))
+
 # show_numeric_summary(taxes, NUMERIC_COLUMNS_TO_INPUTE)
 taxes = require_dataframe(impute_numeric_columns(taxes, NUMERIC_COLUMNS_TO_INPUTE))
 # show_numeric_summary(taxes, NUMERIC_COLUMNS_TO_INPUTE)
@@ -76,7 +82,12 @@ show_missing_values(taxes)
 
 enriched_taxes = dataframe_enrichment(taxes)
 
-print(enriched_taxes)
+# print(enriched_taxes)
 
-print(enriched_taxes.describe())
+# print(enriched_taxes.describe())
 
+print(slow_payers_by_stratus(enriched_taxes))
+
+print(payment_mean_by_neighborhood(enriched_taxes))
+
+print(current_total_per_year(enriched_taxes, 2023))
