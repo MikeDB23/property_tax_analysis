@@ -1,8 +1,10 @@
 import pandas as pd
 
 DATA_FILENAME = "cumplimiento-impuesto-predial_2007_2023.csv"
+# ENRICHED_DATA_FRAME = "cumplimiento-impuesto-predial_2007_2023_enriched.csv"
 
-MISSING_VALUES = ["", "NaN" "NA", "N/A", "NO REGISTRA"]
+
+MISSING_VALUES = ["", "NaN", "NA", "N/A", "NO REGISTRA"]
 
 
 CATEGORY_COLUMNS_TO_INPUTE = ["NOMBRE_LOCALIDAD", "NOMBRE_BARRIO", "DESTINO_SHD", "ESTRATO", "NOMBRE_UPZ"]
@@ -30,36 +32,6 @@ def load_taxes_data() -> pd.DataFrame:
     taxes = pd.read_csv(DATA_FILENAME, delimiter=";", encoding="latin1", na_values=MISSING_VALUES)
     taxes[INT_COLUMNS] = taxes[INT_COLUMNS].astype("Int64")
     return taxes
-
-
-def show_basic_info(dataframe: pd.DataFrame):
-    try:
-        print(f"Shape: {dataframe.shape}\nSize: {dataframe.size}\n")
-        print(dataframe.info())
-    except:
-        print(f"\nError: the parameter is no a valid dataframe ({type(pd.DataFrame)})")
-
-
-def show_value_counts(column: str, dataframe: pd.DataFrame):
-    try:
-        print(f"\n{column}: \n{dataframe[column].value_counts(dropna=False)}")
-    except KeyError as err:
-        print(f"\nError: {err} is not a column")
-
-
-def show_missing_values(dataframe: pd.DataFrame):
-    print(f"\nTotal missing values:\n{dataframe.isna().sum()}")
-
-
-def show_numeric_summary(dataframe: pd.DataFrame, columns: list[str]):
-    for numeric_column in columns:
-        print(f"\n{dataframe[numeric_column].describe().round(2)}")
-
-
-def show_imputation_report(dataframe: pd.DataFrame, columns: list[str]):
-    for column in columns:
-        print(f"\nTotal imputed in {column}: {dataframe[f'{column}_IMPUTED'].sum()}")
-        show_value_counts(column, dataframe)
 
 
 def impute_numeric_columns(dataframe: pd.DataFrame, columns: list[str]) -> pd.DataFrame | None:
@@ -93,3 +65,30 @@ def impute_id_columns(dataframe: pd.DataFrame, columns: list[str]) -> pd.DataFra
         return copy_dataframe
     except KeyError:
         return None
+
+
+def mean_per_predio(dataframe: pd.DataFrame) -> pd.DataFrame | None:
+    try:
+        copy_dataframe = dataframe.copy()
+        copy_dataframe["MEDIA_POR_PREDIO"] = (copy_dataframe["TOTAL_PAGADO"] / copy_dataframe["TOTAL_PREDIOS"]).round(2)
+        return copy_dataframe
+    except KeyError:
+        return None
+
+
+def drop_imputation_flags(dataframe: pd.DataFrame) -> pd.DataFrame:
+    flag_columns = [column for column in dataframe.columns if column.endswith("_IMPUTED")]
+    return dataframe.drop(columns=flag_columns)
+
+
+def dataframe_enrichment(dataframe: pd.DataFrame) -> pd.DataFrame | None:
+    copy_dataframe = mean_per_predio(dataframe)
+    if copy_dataframe is None:
+        return None
+    copy_dataframe = drop_imputation_flags(copy_dataframe)
+    # copy_dataframe.to_csv(ENRICHED_DATA_FRAME, index=False)
+    return copy_dataframe
+
+
+
+
