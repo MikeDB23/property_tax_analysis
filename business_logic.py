@@ -33,6 +33,12 @@ IPC_DICTIONARY = {
     2020 : 1.61, 2021 : 5.62, 2022 : 13.13, 2023 : 9.28, 2024 : 5.20, 2025 : 5.10
 }
 
+YEAR_COLUMN = "ANIO_GRAVABLE"
+PAYMENT_COLUMN = "TOTAL_PAGADO"
+NEIGHBORHOOD_COLUMN = "NOMBRE_BARRIO"
+STRATUS_COLUMN = "ESTRATO"
+SLOW_PAYERS_COLUMN = "TOTAL_PREDIOS_MOROSOS"
+
 
 def load_taxes_data() -> pd.DataFrame:
     taxes = pd.read_csv(DATA_FILENAME, delimiter=";", encoding="latin1", na_values=MISSING_VALUES)
@@ -104,8 +110,6 @@ def normalize_categorical_column(dataframe: pd.DataFrame, column: str, mapping: 
 
 
 def slow_payers_by_stratus(dataframe: pd.DataFrame) -> pd.DataFrame:
-    STRATUS_COLUMN = "ESTRATO"
-    SLOW_PAYERS_COLUMN = "TOTAL_PREDIOS_MOROSOS"
     slow_payers = dataframe.groupby(STRATUS_COLUMN)[SLOW_PAYERS_COLUMN].agg([
         "count",
         "sum",
@@ -115,18 +119,14 @@ def slow_payers_by_stratus(dataframe: pd.DataFrame) -> pd.DataFrame:
 
 
 def payment_mean_by_neighborhood(dataframe: pd.DataFrame) -> pd.DataFrame:
-    NEIGHBORHOOD_COLUMN = "NOMBRE_BARRIO"
-    PAYMENT_COLUMN = "TOTAL_PAGADO"
     payment_mean = dataframe.groupby(NEIGHBORHOOD_COLUMN)[PAYMENT_COLUMN].agg([
         "sum",
         "mean"
-    ])
-    return payment_mean.copy()
+    ]).copy()
+    return payment_mean.sort_values("sum", ascending=False)
 
 
 def current_total_per_year(dataframe: pd.DataFrame, current_year: int) -> pd.DataFrame:
-    YEAR_COLUMN = "ANIO_GRAVABLE"
-    PAYMENT_COLUMN = "TOTAL_PAGADO"
     current_total = (
         dataframe.groupby(YEAR_COLUMN)[PAYMENT_COLUMN]
         .sum()
@@ -134,7 +134,6 @@ def current_total_per_year(dataframe: pd.DataFrame, current_year: int) -> pd.Dat
         .copy()
     )
     current_total["IPC"] = current_total[YEAR_COLUMN].map(IPC_DICTIONARY)
-    print(current_total)
     current_total["VALOR_ACTUAL"] = current_total[PAYMENT_COLUMN] * (IPC_DICTIONARY[current_year] / current_total["IPC"])
     return current_total
 
