@@ -57,7 +57,7 @@ taxes = load_taxes_data()
 
 # show_basic_info(taxes)
 
-# show_missing_values(taxes)
+show_missing_values(taxes)
 
 #for column in COLUMNS_TO_EXPLORE:
 #    show_value_counts(column, taxes)
@@ -76,7 +76,7 @@ taxes = require_dataframe(impute_category_columns(taxes, CATEGORY_COLUMNS_TO_INP
 taxes = require_dataframe(impute_id_columns(taxes, ID_COLUMNS_TO_INPUTE))
 # show_imputation_report(taxes, ID_COLUMNS_TO_INPUTE)
 
-show_missing_values(taxes)
+# show_missing_values(taxes)
 
 enriched_taxes = dataframe_enrichment(taxes)
 
