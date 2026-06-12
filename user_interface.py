@@ -94,3 +94,13 @@ print(f"\n{payment_mean_by_neighborhood(enriched_taxes).head(20)}")
 
 # ¿Cuanto se ha recaudado en pagos totales por año?
 print(f"\n{current_total_per_year(enriched_taxes, 2023)}")
+
+
+
+print(enriched_taxes[["PROFITABILITY"]].value_counts())
+
+# show the SHD distribution
+print(enriched_taxes[["NOMBRE_SHD"]].value_counts())
+
+# show the media por predio distribution
+print(enriched_taxes[["MEDIA_POR_PREDIO"]])

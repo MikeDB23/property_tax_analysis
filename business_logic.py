@@ -111,12 +111,28 @@ def impute_id_columns(dataframe: pd.DataFrame, columns: list[str]) -> pd.DataFra
     except KeyError:
         return None
 
+def profitability(dataframe: pd.DataFrame):
+
+    mean_payment = dataframe["TOTAL_PAGADO"].mean()
+    low_threshold = 0.5 * mean_payment
+    high_threshold = 1.5 * mean_payment
+
+    def profitability_calculation(value: float) -> str:
+        if value > high_threshold:
+            return "ALTA RENTABILIDAD"
+        elif value < low_threshold:
+            return "BAJA RENTABILIDAD"
+        else:
+            return "RENTABILIDAD MEDIA"
+    return profitability_calculation
+
 
 def new_columns(dataframe: pd.DataFrame) -> pd.DataFrame | None:
     try:
         copy_dataframe = dataframe.copy()
         copy_dataframe["MEDIA_POR_PREDIO"] = (copy_dataframe["TOTAL_PAGADO"] / copy_dataframe["TOTAL_PREDIOS"]).round(2)
         copy_dataframe["NOMBRE_SHD"] = copy_dataframe["DESTINO_SHD"].map(CODIGO_SHD)
+        copy_dataframe["PROFITABILITY"] = copy_dataframe["TOTAL_PAGADO"].apply(profitability(copy_dataframe))
         return copy_dataframe
     except KeyError:
         return None
