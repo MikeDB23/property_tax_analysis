@@ -122,6 +122,6 @@ def dataframe_enrichment(dataframe: pd.DataFrame) -> pd.DataFrame | None:
     if copy_dataframe is None:
         return None
     copy_dataframe = drop_imputation_flags(copy_dataframe)
-    copy_dataframe.to_csv(ENRICHED_DATA_FRAME, index=False)
+    copy_dataframe.to_csv(ENRICHED_DATA_FRAME, index=False, sep=";", encoding="latin1")
     return copy_dataframe
 
