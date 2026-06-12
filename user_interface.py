@@ -1,8 +1,13 @@
-from codecs import encode
 import pandas as pd
 
 from business_logic import *
 
+NEIGHBORHOOD_COLUMN = "NOMBRE_BARRIO"
+NEIGHBORHOOD_MAPPING = {
+    "ABRAHAM LINCON": "ABRAHAM LINCOLN"
+}
+
+COLUMNS_TO_EXPLORE = ["NOMBRE_LOCALIDAD", "NOMBRE_UPZ", "NOMBRE_BARRIO", "ESTRATO", "ANIO_GRAVABLE", "DESTINO_SHD"]
 
 def require_dataframe(dataframe):
     if dataframe is None:
@@ -40,28 +45,26 @@ def show_imputation_report(dataframe: pd.DataFrame, columns: list[str]):
         print(f"\nTotal imputed in {column}: {dataframe[f'{column}_IMPUTED'].sum()}")
         show_value_counts(column, dataframe)
 
+def show_section_title(title: str):
+    print(f"\n")
+    print("=" * 50)
+    print(title)
+
 # 1. Cargar datos iniciales
 taxes = load_taxes_data()
+
+# show_section_title("Basic exploration of the dataset")
 
 # show_basic_info(taxes)
 
 show_missing_values(taxes)
 
-# show_value_counts("NOMBRE_LOCALIDAD", taxes)
+#for column in COLUMNS_TO_EXPLORE:
+#    show_value_counts(column, taxes)
 
-# show_value_counts("NOMBRE_UPZ", taxes)
+# show_section_title("Imputation of missing values")
 
-# show_value_counts("NOMBRE_BARRIO", taxes)
-
-# show_value_counts("ESTRATO", taxes)
-
-# show_value_counts("ANIO_GRAVABLE", taxes)
-
-# show_value_counts("DESTINO_SHD", taxes)
-
-# print(f"\n")
-# print("=" * 50)
-# print("Imputation of missing values")
+taxes = require_dataframe(normalize_categorical_column(taxes, NEIGHBORHOOD_COLUMN, NEIGHBORHOOD_MAPPING))
 
 # show_numeric_summary(taxes, NUMERIC_COLUMNS_TO_INPUTE)
 taxes = require_dataframe(impute_numeric_columns(taxes, NUMERIC_COLUMNS_TO_INPUTE))
@@ -77,12 +80,10 @@ taxes = require_dataframe(impute_id_columns(taxes, ID_COLUMNS_TO_INPUTE))
 
 enriched_taxes = dataframe_enrichment(taxes)
 
-print(enriched_taxes)
+# print(enriched_taxes)
 
 # print(enriched_taxes.describe())
 
-<<<<<<< Updated upstream
-=======
 # show_section_title("Questions")
 
 # ¿Cuantos predios morosos se han registrado por cada estrato?
@@ -103,7 +104,3 @@ print(enriched_taxes[["NOMBRE_SHD"]].value_counts())
 
 # show the media por predio distribution
 print(enriched_taxes[["MEDIA_POR_PREDIO"]])
-
-
-
->>>>>>> Stashed changes
