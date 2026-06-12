@@ -97,10 +97,14 @@ print(f"\n{current_total_per_year(enriched_taxes, 2023)}")
 
 
 
-print(enriched_taxes[["PROFITABILITY"]].value_counts())
+print(enriched_taxes[["RENTABILIDAD"]].value_counts())
 
 # show the SHD distribution
+print(enriched_taxes[["DESTINO_SHD"]].value_counts())
 print(enriched_taxes[["NOMBRE_SHD"]].value_counts())
 
 # show the media por predio distribution
 print(enriched_taxes[["MEDIA_POR_PREDIO"]])
+
+
+print(enriched_taxes[['TOTAL_PAGADO','TOTAL_PREDIOS','MEDIA_POR_PREDIO']].head(8))
