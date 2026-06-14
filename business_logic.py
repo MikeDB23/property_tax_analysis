@@ -123,7 +123,7 @@ def profitability(dataframe: pd.DataFrame):
         elif value < low_threshold:
             return "BAJA RENTABILIDAD"
         else:
-            return "RENTABILIDAD MEDIA"
+            return "MEDIA RENTABILIDAD"
     return profitability_calculation
 
 
@@ -159,9 +159,18 @@ def normalize_categorical_column(dataframe: pd.DataFrame, column: str, mapping: 
     copy_dataframe[column] = copy_dataframe[column].str.strip().str.upper().replace(mapping)
     return copy_dataframe
 
-
+def check_for_necessary_columns(dataframe: pd.DataFrame, columns: list[str]) -> list[str]:
+    missing_columns = [
+        col for col in columns if col not in dataframe.columns
+    ]
+    return missing_columns
 
 def slow_payers_by_stratus(dataframe: pd.DataFrame) -> pd.DataFrame:
+    missing_columns = check_for_necessary_columns(dataframe, [STRATUS_COLUMN, SLOW_PAYERS_COLUMN])
+    if missing_columns:
+        raise ValueError(f"The dataframe is missing the necessary columns: {missing_columns}")
+    if not pd.api.types.is_numeric_dtype(dataframe[SLOW_PAYERS_COLUMN]):
+        raise TypeError(f"The column {SLOW_PAYERS_COLUMN} must be numeric")
     slow_payers = dataframe.groupby(STRATUS_COLUMN)[SLOW_PAYERS_COLUMN].agg([
         "count",
         "sum",
@@ -170,7 +179,12 @@ def slow_payers_by_stratus(dataframe: pd.DataFrame) -> pd.DataFrame:
     return slow_payers.copy()
 
 
-def payment_mean_by_neighborhood(dataframe: pd.DataFrame) -> pd.DataFrame:
+def payment_total_by_neighborhood(dataframe: pd.DataFrame) -> pd.DataFrame:
+    missing_columns = check_for_necessary_columns(dataframe, [NEIGHBORHOOD_COLUMN, PAYMENT_COLUMN])
+    if missing_columns:
+        raise ValueError(f"The dataframe is missing the necessary columns: {missing_columns}")
+    if not pd.api.types.is_numeric_dtype(dataframe[PAYMENT_COLUMN]):
+        raise TypeError(f"The column {PAYMENT_COLUMN} must be numeric")
     payment_mean = dataframe.groupby(NEIGHBORHOOD_COLUMN)[PAYMENT_COLUMN].agg([
         "sum",
         "mean"
@@ -178,7 +192,14 @@ def payment_mean_by_neighborhood(dataframe: pd.DataFrame) -> pd.DataFrame:
     return payment_mean.sort_values("sum", ascending=False)
 
 
-def current_total_per_year(dataframe: pd.DataFrame, current_year: int) -> pd.DataFrame:
+def adjust_yearly_totals_for_inflation(dataframe: pd.DataFrame, current_year: int) -> pd.DataFrame:
+    if current_year not in IPC_DICTIONARY:
+        raise KeyError(f"{current_year} is not a valid year, must be between 2000 and {1999 + len(IPC_DICTIONARY)}")
+    missing_columns = check_for_necessary_columns(dataframe, [YEAR_COLUMN, PAYMENT_COLUMN])
+    if missing_columns:
+        raise ValueError(f"The dataframe is missing the necessary columns: {missing_columns}")
+    if not pd.api.types.is_numeric_dtype(dataframe[PAYMENT_COLUMN]):
+        raise TypeError(f"The column {PAYMENT_COLUMN} must be numeric")
     current_total = (
         dataframe.groupby(YEAR_COLUMN)[PAYMENT_COLUMN]
         .sum()
