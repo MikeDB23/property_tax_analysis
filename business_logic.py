@@ -132,7 +132,7 @@ def new_columns(dataframe: pd.DataFrame) -> pd.DataFrame | None:
         copy_dataframe = dataframe.copy()
         copy_dataframe["MEDIA_POR_PREDIO"] = (copy_dataframe["TOTAL_PAGADO"] / copy_dataframe["TOTAL_PREDIOS"]).round(2)
         copy_dataframe["NOMBRE_SHD"] = copy_dataframe["DESTINO_SHD"].map(CODIGO_SHD)
-        copy_dataframe["PROFITABILITY"] = copy_dataframe["TOTAL_PAGADO"].apply(profitability(copy_dataframe))
+        copy_dataframe["RENTABILIDAD"] = copy_dataframe["TOTAL_PAGADO"].apply(profitability(copy_dataframe))
         return copy_dataframe
     except KeyError:
         return None
